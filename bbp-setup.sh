@@ -97,12 +97,17 @@ apt install masscan -y
 echo "${BOLD}"; masscan --version; echo "${RESET}";
 echo
 
+# rustscan
+echo "${GREEN}${BOLD}[*] Install \"rustscan\"${RESET}"
+apt install rustscan -y
+echo "${BOLD}"; rustscan --version; echo "${RESET}";
+echo
+
 # whatweb
 echo "${GREEN}${BOLD}[*] Install \"whatweb\"${RESET}"
 apt install whatweb -y
 echo "${BOLD}"; whatweb --version; echo "${RESET}";
 echo
-
 
 # dirsearch
 echo "${GREEN}${BOLD}[*] Install \"dirsearch\"${RESET}"
