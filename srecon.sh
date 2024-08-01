@@ -93,13 +93,7 @@ fi
 
 # wafw00f
 if command -v  wafw00f &> /dev/null; then
-    if [ ! -f "./recon_$domain/domain_subdomains_enum/alive_subdomains.txt" ]; then
-        echo "[-] alive_subdomains.txt not found: No such file or directory"
-    else
-        while IFS= read -r subdomain; do
-            wafw00f $subdomain | tee -a "./recon_$domain/service_scanning/wafw00f.txt"
-        done < "./recon_$domain/domain_subdomains_enum/alive_subdomains.txt"
-    fi
+    wafw00f -a $domain | tee -a "./recon_$domain/service_scanning/wafw00f.txt"
 else
     echo "[-] wafw00f is not installed"
 fi
