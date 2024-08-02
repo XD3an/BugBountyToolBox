@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash 
 # Author: XD3an
 
 # Parameters Parsing
@@ -101,10 +101,10 @@ fi
 echo "[+] Service Scanning complete"
 echo
 
-# ============================= 6. Gathering Sentive Information and Files =============================
-echo "[*] Starting Gathering Sentive Information and Files"
+# ============================= 6. Gathering Sensitive Information and Files =============================
+echo "[*] Starting Gathering Sensitive Information and Files"
 
-mkdir -p "./recon_$domain/sentive_info_files"
+mkdir -p "./recon_$domain/sensitive_info_files"
 
 # dirsearch
 if command -v dirsearch &> /dev/null; then
@@ -113,7 +113,7 @@ if command -v dirsearch &> /dev/null; then
     else
         while IFS= read -r subdomain; do
             pure_subdomain=$(echo $subdomain | sed 's/http[s]*:\/\///')
-            dirsearch -u $pure_subdomain -e conf,config,bak,backup,swp,old,db,sql,asp,aspx,aspx~,asp~,py,py~,rb,rb~,php,php~,bak,bkp,cache,cgi,csv,html,inc,jar,js,json,jsp,jsp~,lock,log,rar,sql.gz,zip,sql.tar.gz,swp,swp~,tar,tar,tar.bz2,tar.gz,txt,zip,xml,json -o "./recon_$domain/sentive_info_files/dirsearch_$pure_subdomain.txt"
+            dirsearch -u $pure_subdomain -e conf,config,bak,backup,swp,old,db,sql,asp,aspx,aspx~,asp~,py,py~,rb,rb~,php,php~,bak,bkp,cache,cgi,csv,html,inc,jar,js,json,jsp,jsp~,lock,log,rar,sql.gz,zip,sql.tar.gz,swp,swp~,tar,tar,tar.bz2,tar.gz,txt,zip,xml,json -o "./recon_$domain/sensitive_info_files/dirsearch_$pure_subdomain.txt"
         done < "./recon_$domain/domain_subdomains_enum/alive_subdomains.txt"
     fi
     cat ./recon_$domain/sentive_info_files/dirsearch_*.txt > ./recon_$domain/sentive_info_files/dirsearch_all.txt
@@ -122,7 +122,7 @@ if command -v dirsearch &> /dev/null; then
 else
     echo "[-] dirsearch is not installed"
 fi
-echo "[+] Gathering Sentive Information and Files complete"
+echo "[+] Gathering Sensitive Information and Files complete"
 echo
 
 # ===================================== 7. Vulnerability Scanning ======================================
