@@ -14,15 +14,20 @@ fi
 #     - sublist3r
 #     - subfinder
 #     - httpx-toolkit
+#
 #   2. Domain and Subdomain Information Gathering
 #     - whois
+#
 #   3. Port Scanning
 #     - rustscan
+#
 #   4. Service Scanning
 #     - whatweb
 #     - wafw00f
+#
 #   5. Gathering Sensitive Information and Files
 #     - dirsearch
+#
 #   6. Vulnerability Scanning
 #     - nuclei, NucleiFuzzer
 #
@@ -58,8 +63,8 @@ recon_domain() {
 
     # httpx-toolkit
     if command -v httpx-toolkit &> /dev/null; then
-        echo $domain | httpx-toolkit | tee -a "./recon_$domain/domain_subdomains_enum/all_alive_subdomains.txt"
-        cat "./recon_$domain/domain_subdomains_enum/"* | sort -u | httpx-toolkit | tee -a "./recon_$domain/domain_subdomains_enum/all_alive_subdomains.txt"
+        # echo $domain | httpx-toolkit | tee -a "./recon_$domain/domain_subdomains_enum/all_alive_subdomains.txt"
+        cat "./recon_$domain/domain_subdomains_enum/"* | sort -u | httpx-toolkit -threads 200  | tee -a "./recon_$domain/domain_subdomains_enum/all_alive_subdomains.txt"
     else
         echo "[-] httpx-toolkit is not installed"
     fi
@@ -92,7 +97,8 @@ recon_domain() {
             echo "[-] all_alive_subdomains.txt not found: No such file or directory"
         else
             while IFS= read -r subdomain; do
-                rustscan -a $subdomain --ulimit 5000 | tee -a "./recon_$domain/port_scanning/rustscan_$subdomain.txt"
+                pure_subdomain=$(echo $subdomain | sed 's/http[s]*:\/\///')
+                rustscan -a $pure_subdomain --ulimit 5000 | tee -a "./recon_$domain/port_scanning/rustscan.txt"
             done < "./recon_$domain/domain_subdomains_enum/all_alive_subdomains.txt"
         fi
     else
@@ -148,12 +154,12 @@ recon_domain() {
         else
             while IFS= read -r subdomain; do
                 pure_subdomain=$(echo $subdomain | sed 's/http[s]*:\/\///')
-                dirsearch -u $pure_subdomain -e conf,config,bak,backup,swp,old,db,sql,asp,aspx,aspx~,asp~,py,py~,rb,rb~,php,php~,bak,bkp,cache,cgi,csv,html,inc,jar,js,json,jsp,jsp~,lock,log,rar,sql.gz,zip,sql.tar.gz,swp,swp~,tar,tar,tar.bz2,tar.gz,txt,zip,xml,json -o "./recon_$domain/sensitive_info_files/dirsearch_$pure_subdomain.txt"
+                dirsearch -u $pure_subdomain -x 500,502,429,404,400 -R 5 --random-agent -t 100 -F -e conf,config,bak,backup,swp,old,db,sql,asp,aspx,aspx~,asp~,py,py~,rb,rb~,php,php~,bak,bkp,cache,cgi,csv,html,inc,jar,js,json,jsp,jsp~,lock,log,rar,sql.gz,zip,sql.tar.gz,swp,swp~,tar,tar,tar.bz2,tar.gz,txt,zip,xml,json -o "./recon_$domain/sensitive_info_files/_dirsearch_$pure_subdomain"
             done < "./recon_$domain/domain_subdomains_enum/all_alive_subdomains.txt"
         fi
-        cat "./recon_$domain/sensitive_info_files/dirsearch_"* > "./recon_$domain/sensitive_info_files/all_dirsearch.txt"
         rm -rf "./reports/"
-        rm -rf "./recon_$domain/sensitive_info_files/dirsearch_"*
+        cat "./recon_$domain/sensitive_info_files/"* | tee -a "./recon_$domain/sensitive_info_files/dirsearch.txt"
+        rm -rf "./recon_$domain/sensitive_info_files/_dirsearch_"*
     else
         echo "[-] dirsearch is not installed"
     fi
@@ -183,9 +189,12 @@ recon_domain() {
     echo
 }
 
+
+# TODO: Add more tools and steps as per your requirement
 # other tools
 # - waybackurls
 # - paramspider
+# screenshot
 
 # Check if the input is a domain or a file
 if [ -f "$1" ]; then
