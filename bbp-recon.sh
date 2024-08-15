@@ -7,29 +7,44 @@ if [ -z "$1" ]; then
     exit 1
 fi
 
-# [Recon Process func]
+command_exists() {
+    command -v "$1" &> /dev/null
+}
+
+# [Recon Process function]
 #
 # *Recon Process Flow:
 #   1. Domain and Subdomain enumeration
 #     - sublist3r
 #     - subfinder
 #     - httpx-toolkit
+#   
+#   2. DNS Enumeration
+#    - dnsenum
+#    - dnsrecon 
 #
-#   2. Domain and Subdomain Information Gathering
+#   3. Domain and Subdomain Information Gathering
 #     - whois
 #
-#   3. Port Scanning
+#   4. Port Scanning
 #     - rustscan
 #
-#   4. Service Scanning
+#   5. Service Scanning
 #     - whatweb
 #     - wafw00f
 #
-#   5. Gathering Sensitive Information and Files
+#   6. Gathering Sensitive Information and Files
 #     - dirsearch
 #
-#   6. Vulnerability Scanning
+#   7. Vulnerability Scanning
 #     - nuclei, NucleiFuzzer
+#
+#   8. Other Tools
+#     - Git exposure
+#     - waybackurls
+#     - *JavaScript
+#     - *s3scanner 
+#     - *APIs
 #
 # This is the basic flow of the recon process. You can add more tools and steps as per your requirement.
 #
@@ -48,21 +63,21 @@ recon_domain() {
     mkdir -p "./recon_$domain/domain_subdomains_enum"
 
     # sublist3r
-    if command -v sublist3r &> /dev/null; then
+    if command_exists sublist3r; then
         sublist3r -d $domain -o "./recon_$domain/domain_subdomains_enum/sublist3r.txt"
     else
         echo "[-] sublist3r is not installed"
     fi
 
     # subfinder
-    if command -v subfinder &> /dev/null; then
+    if command_exists -v subfinder; then
         subfinder -d $domain -o "./recon_$domain/domain_subdomains_enum/subfinder.txt"
     else
         echo "[-] subfinder is not installed"
     fi
 
     # httpx-toolkit
-    if command -v httpx-toolkit &> /dev/null; then
+    if command_exists httpx-toolkit; then
         # echo $domain | httpx-toolkit | tee -a "./recon_$domain/domain_subdomains_enum/all_alive_subdomains.txt"
         cat "./recon_$domain/domain_subdomains_enum/"* | sort -u | httpx-toolkit -threads 200  | tee -a "./recon_$domain/domain_subdomains_enum/all_alive_subdomains.txt"
     else
@@ -72,13 +87,35 @@ recon_domain() {
     echo "[+] Domain and Subdomain enumeration complete"
     echo
 
-    # ============================ 2. Domain and Subdomain Information Gathering ============================
+    # ====================================== 2. DNS Enumeration ==========================================
+    echo "[*] Starting DNS Enumeration"
+
+    mkdir -p "./recon_$domain/dns_enum"
+
+    # dnsenum
+    if command_exists dnsenum; then
+        dnsenum $domain --noreverse -o "./recon_$domain/dns_enum/dnsenum.txt"
+    else
+        echo "[-] dnsenum is not installed"
+    fi
+
+    # dnsrecon
+    if command_exists dnsrecon; then
+        dnsrecon -d $domain  -t std,brt -c "./recon_$domain/dns_enum/dnsrecon.csv"
+    else
+        echo "[-] dnsrecon is not installed"
+    fi
+
+    echo "[+] DNS Enumeration complete"
+    echo  
+
+    # ============================ 3. Domain and Subdomain Information Gathering ============================
     echo "[*] Starting Domain and Subdomain Information Gathering"
 
     mkdir -p "./recon_$domain/info_gathering"
 
     # whois
-    if command -v whois &> /dev/null; then
+    if command_exists whois; then
         whois $domain | tee -a "./recon_$domain/info_gathering/whois.txt"
     else
         echo "[-] whois is not installed"
@@ -86,13 +123,13 @@ recon_domain() {
     echo "[+] Domain and Subdomain Information Gathering complete"
     echo
 
-    # ======================================== 3. Port Scanning ============================================
+    # ======================================== 4. Port Scanning ============================================
     echo "[*] Starting Port Scanning"
 
     mkdir -p "./recon_$domain/port_scanning"
 
     # rustscan
-    if command -v rustscan &> /dev/null; then
+    if command_exists rustscan; then
         if [ ! -f "./recon_$domain/domain_subdomains_enum/all_alive_subdomains.txt" ]; then
             echo "[-] all_alive_subdomains.txt not found: No such file or directory"
         else
@@ -108,13 +145,13 @@ recon_domain() {
     echo "[+] Port Scanning complete"
     echo
 
-    # ======================================= 4. Service Scanning ==========================================
+    # ======================================= 5. Service Scanning ==========================================
     echo "[*] Starting Service Scanning"
 
     mkdir -p "./recon_$domain/service_scanning"
 
     # whatweb
-    if command -v whatweb &> /dev/null; then
+    if command_exists whatweb; then
         if [ ! -f "./recon_$domain/domain_subdomains_enum/all_alive_subdomains.txt" ]; then
             echo "[-] all_alive_subdomains.txt not found: No such file or directory"
         else 
@@ -127,7 +164,7 @@ recon_domain() {
     fi
 
     # wafw00f
-    if command -v  wafw00f &> /dev/null; then
+    if command_exists  wafw00f; then
         if [ ! -f "./recon_$domain/domain_subdomains_enum/all_alive_subdomains.txt" ]; then
             echo "[-] alive_subdomains.txt not found: No such file or directory"
         else
@@ -142,13 +179,13 @@ recon_domain() {
     echo "[+] Service Scanning complete"
     echo
 
-    # ============================= 5. Gathering Sensitive Information and Files =============================
+    # ============================= 6. Gathering Sensitive Information and Files =============================
     echo "[*] Starting Gathering Sensitive Information and Files"
 
     mkdir -p "./recon_$domain/sensitive_info_files"
 
     # dirsearch
-    if command -v dirsearch &> /dev/null; then
+    if command_exists dirsearch; then
         if [ ! -f "./recon_$domain/domain_subdomains_enum/all_alive_subdomains.txt" ]; then
             echo "[-] alive_subdomains.txt not found: No such file or directory"
         else
@@ -166,13 +203,13 @@ recon_domain() {
     echo "[+] Gathering Sensitive Information and Files complete"
     echo
 
-    # ===================================== 6. Vulnerability Scanning ======================================
+    # ===================================== 7. Vulnerability Scanning ======================================
     echo "[*] Starting Vulnerability Scanning"
 
     mkdir -p "./recon_$domain/vuln_scanning"
 
     # nuclei, NucleiFuzzer
-    if command -v nf &> /dev/null; then
+    if command_exists nf; then
         if [ ! -f "./recon_$domain/domain_subdomains_enum/all_alive_subdomains.txt" ]; then
             echo "[-] alive_subdomains.txt not found: No such file or directory"
         else
@@ -187,14 +224,55 @@ recon_domain() {
     fi
     echo "[+] Vulnerability Scanning complete"
     echo
+
+    # other tools
+
+    mkdir -p "./recon_$domain/other_tools"
+
+    # Git exposure
+    echo "[*] Starting Git exposure scanning"
+    for subdomain in $(cat "./recon_$domain/domain_subdomains_enum/all_alive_subdomains.txt"); do
+        curl -s "https://$subdomain/.git/HEAD" | grep "ref" && echo "https://$subdomain/.git" | tee -a "./recon_$domain/other_tools/git_exposure.txt"
+    done
+    echo "[+] Git exposure scanning complete"
+    echo
+
+    # waybackurls
+    echo "[*] Starting waybackurls"
+    if command_exists waybackurls; then
+        waybackurls $domain | tee -a "./recon_$domain/other_tools/waybackurls.txt"
+    else
+        echo "[-] waybackurls is not installed"
+    fi
+    echo "[+] waybackurls complete"
+    echo
 }
 
 
-# TODO: Add more tools and steps as per your requirement
-# other tools
-# - waybackurls
-# - paramspider
-# screenshot
+# TODO: Vulnerability Scanning tools
+#   - Directory Traversal (Information Leakage): 
+#      - dotdotpwn
+#   - SQL Injection: 
+#      - sqlmap
+#   - Cross-Site Scripting: 
+#      - XSStrike
+#   - Command Injection: 
+#      - commix
+#   - HTTP Header Injection (HTML Injection and Content Spoofing): 
+#      - headi
+#   - Template Injection: 
+#   - Cross-Site Request Forgery
+#   - Server-Side Request Forgery
+#   - File Inclusion
+#   - Arbitrary File Upload
+#   - Unvalidated Redirects and Forwards:
+#      - openredirex 
+#   - Subdomain Takeover: 
+#      - subzy
+#   - IDOR (Broken Access Control)
+#   - Using Known Vulnerable Components
+#   - Security Misconfiguration
+#   - ...
 
 # Check if the input is a domain or a file
 if [ -f "$1" ]; then

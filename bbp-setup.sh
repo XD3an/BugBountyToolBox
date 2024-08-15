@@ -103,6 +103,12 @@ apt install rustscan -y
 echo "${BOLD}"; rustscan --version; echo "${RESET}";
 echo
 
+# dnseum
+echo "${GREEN}${BOLD}[*] Install \"dnseum\"${RESET}"
+apt install dnseum -y
+echo "${BOLD}"; dnseum --version; echo "${RESET}";
+echo
+
 # whatweb
 echo "${GREEN}${BOLD}[*] Install \"whatweb\"${RESET}"
 apt install whatweb -y
