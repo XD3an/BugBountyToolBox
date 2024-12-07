@@ -14,7 +14,7 @@
 
 ## One-liners
 
-### Directory Transversal
+### Directory Traversal 
 
 ```sh
 dotdotpwn.pl -m http -h $domain
