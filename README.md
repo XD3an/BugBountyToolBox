@@ -49,7 +49,7 @@ python3 xsstrike.py -u $url # url in xss.txt
 ```
 
 - Burp Intruder Payloads
-    - [https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/XSS Injection/Intruders](https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/XSS Injection/Intruders)
+    - [https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/XSS%20Injection/Intruders](https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/XSS%20Injection/Intruders)
 
 ### Command Injection
 
